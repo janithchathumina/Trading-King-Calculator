@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRADING KING CALCULATOR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        mono: {
+                            950: '#000000',
+                            900: '#050505',
+                            800: '#0d0d0d',
+                            700: '#1a1a1a',
+                            600: '#2a2a2a',
+                            400: '#888888',
+                            300: '#b0b0b0',
+                            100: '#ffffff'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #000000;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 85% 90%, rgba(255, 255, 255, 0.02) 0%, transparent 40%);
+            background-attachment: fixed;
+            font-family: 'Inter', sans-serif;
+            color: #ffffff;
+        }
+
+        /* Glassmorphism Styling - Pure Black & Translucent White */
+        .glass-card {
+            background: rgba(13, 13, 13, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .glass-input {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-input:focus {
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+
+        /* Typewriter Cursor Effect */
+        .typewriter-cursor::after {
+            content: '|';
+            animation: blink 0.8s infinite;
+            color: #ffffff;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Custom Tab Styling */
+        .tab-btn.active {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1a1a1a;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #333333;
+        }
+
+        /* Hide Number Input Arrows */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-4 sm:p-8 antialiased">
+
+    
+    <header class="max-w-7xl mx-auto w-full mb-8">
+        <div class="glass-card rounded-2xl p-6 sm:p-8 text-center relative overflow-hidden">
+            
+            <h1 class="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white font-mono">
+                <span id="typewriter-text"></span><span class="typewriter-cursor"></span>
+            </h1>
+
+        </div>
+    </header>
+
+    
+    <main class="max-w-7xl mx-auto w-full flex-grow flex flex-col lg:flex-row gap-6">
+
+        
+        <nav class="w-full lg:w-72 flex-shrink-0">
+            <div class="glass-card rounded-2xl p-3 lg:sticky lg:top-6">
+                <div class="flex lg:flex-col overflow-x-auto lg:overflow-x-visible gap-2 no-scrollbar pb-2 lg:pb-0">
+                    
+                    <button onclick="switchTab('pnl')" id="tab-pnl" class="tab-btn active flex items-center gap-3 px-4 py-3 rounded-xl border border-white/5 text-mono-300 hover:text-white hover:bg-white/5 transition-all text-xs font-semibold uppercase tracking-wider whitespace-nowrap w-full text-left">
+                        <i class="fa-solid fa-chart-line text-white/70 w-4"></i>
+                        <span>Profit / Loss</span>
+                    </button>
+
+                    <button onclick="switchTab('sltp')" id="tab-sltp" class="tab-btn flex items-center gap-3 px-4 py-3 rounded-xl border border-white/5 text-mono-300 hover:text-white hover:bg-white/5 transition-all text-xs font-semibold uppercase tracking-wider whitespace-nowrap w-full text-left">
+                        <i class="fa-solid fa-shield-halved text-white/70 w-4"></i>
+                        <span>Stop Loss & TP</span>
+                    </button>
+
+                    <button onclick="switchTab('avg')" id="tab-avg" class="tab-btn flex items-center gap-3 px-4 py-3 rounded-xl border border-white/5 text-mono-300 hover:text-white hover:bg-white/5 transition-all text-xs font-semibold uppercase tracking-wider whitespace-nowrap w-full text-left">
+                        <i class="fa-solid fa-layer-group text-white/70 w-4"></i>
+                        <span>Average Down / Up</span>
+                    </button>
+
+                    <button onclick="switchTab('pos')" id="tab-pos" class="tab-btn flex items-center gap-3 px-4 py-3 rounded-xl border border-white/5 text-mono-300 hover:text-white hover:bg-white/5 transition-all text-xs font-semibold uppercase tracking-wider whitespace-nowrap w-full text-left">
+                        <i class="fa-solid fa-calculator text-white/70 w-4"></i>
+                        <span>Position Size</span>
+                    </button>
+
+                    <button onclick="switchTab('rr')" id="tab-rr" class="tab-btn flex items-center gap-3 px-4 py-3 rounded-xl border border-white/5 text-mono-300 hover:text-white hover:bg-white/5 transition-all text-xs font-semibold uppercase tracking-wider whitespace-nowrap w-full text-left">
+                        <i class="fa-solid fa-scale-balanced text-white/70 w-4"></i>
+                        <span>Risk / Reward</span>
+                    </button>
+
+                    <button onclick="switchTab('target')" id="tab-target" class="tab-btn flex items-center gap-3 px-4 py-3 rounded-xl border border-white/5 text-mono-300 hover:text-white hover:bg-white/5 transition-all text-xs font-semibold uppercase tracking-wider whitespace-nowrap w-full text-left">
+                        <i class="fa-solid fa-bullseye text-white/70 w-4"></i>
+                        <span>Target Price</span>
+                    </button>
+
+                    <button onclick="switchTab('be')" id="tab-be" class="tab-btn flex items-center gap-3 px-4 py-3 rounded-xl border border-white/5 text-mono-300 hover:text-white hover:bg-white/5 transition-all text-xs font-semibold uppercase tracking-wider whitespace-nowrap w-full text-left">
+                        <i class="fa-solid fa-receipt text-white/70 w-4"></i>
+                        <span>Break-Even</span>
+                    </button>
+
+                </div>
+            </div>
+        </nav>
+
+        
+        <div class="flex-grow">
+            
+            
+
+
+            <section id="panel-pnl" class="calc-panel space-y-6">
+                <div class="glass-card rounded-2xl p-6 sm:p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-bold text-white uppercase tracking-wide flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-white/50"></i>
+                            Profit / Loss Calculator
+                        </h2>
+                        <button onclick="resetPnL()" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-mono-300 text-xs font-medium transition flex items-center gap-1 border border-white/10">
+                            <i class="fa-solid fa-rotate-left"></i> Reset
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Position Order</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button type="button" id="pnl-type-long" onclick="setPnLType('long')" class="py-2.5 rounded-xl border border-white/40 bg-white/10 text-white text-xs font-semibold transition">LONG</button>
+                                    <button type="button" id="pnl-type-short" onclick="setPnLType('short')" class="py-2.5 rounded-xl border border-white/10 bg-white/5 text-mono-400 text-xs font-semibold transition">SHORT</button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Entry Price ($)</label>
+                                <input type="number" id="pnl-entry" placeholder="0.00" oninput="calcPnL()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Exit Price ($)</label>
+                                <input type="number" id="pnl-exit" placeholder="0.00" oninput="calcPnL()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Amount / Margin ($)</label>
+                                    <input type="number" id="pnl-qty" placeholder="0.00" oninput="calcPnL()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Leverage (x)</label>
+                                    <input type="number" id="pnl-lev" value="1" min="1" oninput="calcPnL()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        
+                        <div class="glass-card rounded-xl p-6 border border-white/10 flex flex-col justify-between bg-black/50">
+                            <div>
+                                <span class="text-xs font-mono uppercase text-mono-400 tracking-widest">Net Profit / Loss</span>
+                                <div id="pnl-status" class="mt-2 text-3xl font-bold font-mono text-white">$0.00</div>
+                                <div id="pnl-roi" class="text-xs font-semibold text-mono-400 mt-1 font-mono">ROI: 0.00%</div>
+                            </div>
+
+                            <div class="space-y-3 my-6 border-t border-white/10 pt-4">
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-mono-400">Initial Margin:</span>
+                                    <span id="pnl-margin" class="font-mono text-white">$0.00</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-mono-400">Total Position Value:</span>
+                                    <span id="pnl-val" class="font-mono text-white">$0.00</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-mono-400">Total Account Return:</span>
+                                    <span id="pnl-total" class="font-mono text-white">$0.00</span>
+                                </div>
+                            </div>
+
+                            <div class="text-[11px] text-mono-400 leading-relaxed">
+                                Return calculation includes total position size multiplied by leverage.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            
+            <section id="panel-sltp" class="calc-panel space-y-6 hidden">
+                <div class="glass-card rounded-2xl p-6 sm:p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-bold text-white uppercase tracking-wide flex items-center gap-2">
+                            <i class="fa-solid fa-shield-halved text-white/50"></i>
+                            Stop Loss & Take Profit Calculator
+                        </h2>
+                        <button onclick="resetSLTP()" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-mono-300 text-xs font-medium transition flex items-center gap-1 border border-white/10">
+                            <i class="fa-solid fa-rotate-left"></i> Reset
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Position Order</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button type="button" id="sltp-type-long" onclick="setSLTPType('long')" class="py-2.5 rounded-xl border border-white/40 bg-white/10 text-white text-xs font-semibold transition">LONG</button>
+                                    <button type="button" id="sltp-type-short" onclick="setSLTPType('short')" class="py-2.5 rounded-xl border border-white/10 bg-white/5 text-mono-400 text-xs font-semibold transition">SHORT</button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Entry Price ($)</label>
+                                <input type="number" id="sltp-entry" placeholder="0.00" oninput="calcSLTP()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Stop Loss (%)</label>
+                                    <input type="number" id="sltp-risk-pct" placeholder="2.00" oninput="calcSLTP()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Take Profit (%)</label>
+                                    <input type="number" id="sltp-reward-pct" placeholder="6.00" oninput="calcSLTP()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Position Size ($)</label>
+                                <input type="number" id="sltp-cap" placeholder="1000.00" oninput="calcSLTP()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                            </div>
+                        </div>
+
+                        
+                        <div class="glass-card rounded-xl p-6 border border-white/10 flex flex-col justify-between bg-black/50 space-y-6">
+                            <div>
+                                <span class="text-xs font-mono uppercase text-mono-400 tracking-widest">Take Profit Target</span>
+                                <div id="sltp-tp-price" class="text-2xl font-bold font-mono text-white mt-1">$0.00</div>
+                                <div id="sltp-tp-amount" class="text-xs font-mono text-mono-300 mt-1">Estimated Gain: +$0.00</div>
+                            </div>
+
+                            <div class="border-t border-white/10 pt-4">
+                                <span class="text-xs font-mono uppercase text-mono-400 tracking-widest">Stop Loss Target</span>
+                                <div id="sltp-sl-price" class="text-2xl font-bold font-mono text-mono-300 mt-1">$0.00</div>
+                                <div id="sltp-sl-amount" class="text-xs font-mono text-mono-400 mt-1">Maximum Risk: -$0.00</div>
+                            </div>
+
+                            <div class="text-[11px] text-mono-400 leading-relaxed">
+                                Exact exit prices calculated directly from entry value and risk tolerance limits.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            
+            <section id="panel-avg" class="calc-panel space-y-6 hidden">
+                <div class="glass-card rounded-2xl p-6 sm:p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-bold text-white uppercase tracking-wide flex items-center gap-2">
+                            <i class="fa-solid fa-layer-group text-white/50"></i>
+                            Average Down / Up (DCA) Calculator
+                        </h2>
+                        <button onclick="resetAvg()" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-mono-300 text-xs font-medium transition flex items-center gap-1 border border-white/10">
+                            <i class="fa-solid fa-rotate-left"></i> Reset
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-medium text-mono-400 uppercase tracking-wider">Purchase Orders</span>
+                                <button type="button" onclick="addAvgRow()" id="add-row-btn" class="px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-xs font-medium transition">
+                                    + Add Order
+                                </button>
+                            </div>
+
+                            <div id="dca-rows-container" class="space-y-3 max-h-[320px] overflow-y-auto pr-1">
+                                
+                            </div>
+                        </div>
+
+                        
+                        <div class="glass-card rounded-xl p-6 border border-white/10 flex flex-col justify-between bg-black/50">
+                            <div>
+                                <span class="text-xs font-mono uppercase text-mono-400 tracking-widest">Weighted Average Entry</span>
+                                <div id="avg-result-price" class="text-3xl font-bold font-mono text-white mt-2">$0.00</div>
+                            </div>
+
+                            <div class="space-y-3 my-6 border-t border-white/10 pt-4">
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-mono-400">Total Capital Spent:</span>
+                                    <span id="avg-total-cost" class="font-mono text-white">$0.00</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-mono-400">Total Position Units:</span>
+                                    <span id="avg-total-units" class="font-mono text-white">0.00</span>
+                                </div>
+                            </div>
+
+                            <div class="text-[11px] text-mono-400 leading-relaxed">
+                                Weighted average price dynamically scales as you adjust sizes and order prices.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            
+            <section id="panel-pos" class="calc-panel space-y-6 hidden">
+                <div class="glass-card rounded-2xl p-6 sm:p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-bold text-white uppercase tracking-wide flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-white/50"></i>
+                            Position Size Calculator
+                        </h2>
+                        <button onclick="resetPos()" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-mono-300 text-xs font-medium transition flex items-center gap-1 border border-white/10">
+                            <i class="fa-solid fa-rotate-left"></i> Reset
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Account Balance ($)</label>
+                                <input type="number" id="pos-balance" placeholder="10000.00" oninput="calcPos()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Risk Tolerance (%)</label>
+                                <input type="number" id="pos-risk-pct" placeholder="1.00" oninput="calcPos()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Entry Price ($)</label>
+                                    <input type="number" id="pos-entry" placeholder="0.00" oninput="calcPos()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Stop Loss ($)</label>
+                                    <input type="number" id="pos-sl" placeholder="0.00" oninput="calcPos()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div class="glass-card rounded-xl p-6 border border-white/10 flex flex-col justify-between bg-black/50">
+                            <div>
+                                <span class="text-xs font-mono uppercase text-mono-400 tracking-widest">Recommended Position Value</span>
+                                <div id="pos-size-usd" class="text-3xl font-bold font-mono text-white mt-1">$0.00</div>
+                                <div id="pos-size-units" class="text-xs font-mono text-mono-300 mt-1">Contract Units: 0.00</div>
+                            </div>
+
+                            <div class="space-y-3 my-6 border-t border-white/10 pt-4">
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-mono-400">Maximum Loss Exposure ($):</span>
+                                    <span id="pos-risk-usd" class="font-mono text-white">$0.00</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-mono-400">Stop Loss Gap (%):</span>
+                                    <span id="pos-sl-dist" class="font-mono text-white">0.00%</span>
+                                </div>
+                            </div>
+
+                            <div class="text-[11px] text-mono-400 leading-relaxed">
+                                Ensures single trade risk remains locked to your specified percentage of total capital.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            
+            <section id="panel-rr" class="calc-panel space-y-6 hidden">
+                <div class="glass-card rounded-2xl p-6 sm:p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-bold text-white uppercase tracking-wide flex items-center gap-2">
+                            <i class="fa-solid fa-scale-balanced text-white/50"></i>
+                            Risk / Reward Ratio Calculator
+                        </h2>
+                        <button onclick="resetRR()" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-mono-300 text-xs font-medium transition flex items-center gap-1 border border-white/10">
+                            <i class="fa-solid fa-rotate-left"></i> Reset
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Entry Price ($)</label>
+                                <input type="number" id="rr-entry" placeholder="0.00" oninput="calcRR()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Stop Loss ($)</label>
+                                    <input type="number" id="rr-sl" placeholder="0.00" oninput="calcRR()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Target Price ($)</label>
+                                    <input type="number" id="rr-target" placeholder="0.00" oninput="calcRR()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Trade Amount ($)</label>
+                                <input type="number" id="rr-amount" placeholder="1000.00" oninput="calcRR()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                            </div>
+                        </div>
+
+                        
+                        <div class="glass-card rounded-xl p-6 border border-white/10 flex flex-col justify-between bg-black/50">
+                            <div>
+                                <span class="text-xs font-mono uppercase text-mono-400 tracking-widest">Risk : Reward Ratio</span>
+                                <div id="rr-ratio" class="text-3xl font-bold font-mono text-white mt-1">1 : 0.00</div>
+                                <div id="rr-quality" class="inline-block px-3 py-1 rounded-full text-[11px] font-mono tracking-wider uppercase mt-2 bg-white/10 text-mono-300 border border-white/10">
+                                    INACTIVE
+                                </div>
+                            </div>
+
+                            <div class="space-y-3 my-6 border-t border-white/10 pt-4">
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-mono-400">Risk Amount ($):</span>
+                                    <span id="rr-risk-val" class="font-mono text-white">$0.00 (0.00%)</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-mono-400">Reward Amount ($):</span>
+                                    <span id="rr-reward-val" class="font-mono text-white">$0.00 (0.00%)</span>
+                                </div>
+                            </div>
+
+                            <div class="text-[11px] text-mono-400 leading-relaxed">
+                                Measures expected yield against initial capital outlay at risk.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            
+            <section id="panel-target" class="calc-panel space-y-6 hidden">
+                <div class="glass-card rounded-2xl p-6 sm:p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-bold text-white uppercase tracking-wide flex items-center gap-2">
+                            <i class="fa-solid fa-bullseye text-white/50"></i>
+                            Target Price Calculator
+                        </h2>
+                        <button onclick="resetTarget()" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-mono-300 text-xs font-medium transition flex items-center gap-1 border border-white/10">
+                            <i class="fa-solid fa-rotate-left"></i> Reset
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Position Order</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button type="button" id="target-type-long" onclick="setTargetType('long')" class="py-2.5 rounded-xl border border-white/40 bg-white/10 text-white text-xs font-semibold transition">LONG</button>
+                                    <button type="button" id="target-type-short" onclick="setTargetType('short')" class="py-2.5 rounded-xl border border-white/10 bg-white/5 text-mono-400 text-xs font-semibold transition">SHORT</button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Entry Price ($)</label>
+                                <input type="number" id="target-entry" placeholder="0.00" oninput="calcTarget()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Target Profit (%)</label>
+                                <input type="number" id="target-pct" placeholder="10.00" oninput="calcTarget()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Capital Outlay ($)</label>
+                                <input type="number" id="target-capital" placeholder="1000.00" oninput="calcTarget()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                            </div>
+                        </div>
+
+                        
+                        <div class="glass-card rounded-xl p-6 border border-white/10 flex flex-col justify-between bg-black/50">
+                            <div>
+                                <span class="text-xs font-mono uppercase text-mono-400 tracking-widest">Required Target Price</span>
+                                <div id="target-exit-price" class="text-3xl font-bold font-mono text-white mt-1">$0.00</div>
+                            </div>
+
+                            <div class="space-y-3 my-6 border-t border-white/10 pt-4">
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-mono-400">Expected Profit ($):</span>
+                                    <span id="target-profit-usd" class="font-mono text-white">$0.00</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-mono-400">Required Market Move:</span>
+                                    <span id="target-move-pct" class="font-mono text-white">0.00%</span>
+                                </div>
+                            </div>
+
+                            <div class="text-[11px] text-mono-400 leading-relaxed">
+                                Calculates exact price target required to realize desired percentage gain.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            
+            <section id="panel-be" class="calc-panel space-y-6 hidden">
+                <div class="glass-card rounded-2xl p-6 sm:p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-bold text-white uppercase tracking-wide flex items-center gap-2">
+                            <i class="fa-solid fa-receipt text-white/50"></i>
+                            Break-Even Price Calculator
+                        </h2>
+                        <button onclick="resetBE()" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-mono-300 text-xs font-medium transition flex items-center gap-1 border border-white/10">
+                            <i class="fa-solid fa-rotate-left"></i> Reset
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Entry Price ($)</label>
+                                <input type="number" id="be-entry" placeholder="0.00" oninput="calcBE()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Maker Buy Fee (%)</label>
+                                    <input type="number" id="be-buy-fee" value="0.10" step="0.01" oninput="calcBE()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Taker Sell Fee (%)</label>
+                                    <input type="number" id="be-sell-fee" value="0.10" step="0.01" oninput="calcBE()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-mono-400 mb-1.5 uppercase tracking-wider">Order Value ($)</label>
+                                <input type="number" id="be-qty" placeholder="1000.00" oninput="calcBE()" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono">
+                            </div>
+                        </div>
+
+                        
+                        <div class="glass-card rounded-xl p-6 border border-white/10 flex flex-col justify-between bg-black/50">
+                            <div>
+                                <span class="text-xs font-mono uppercase text-mono-400 tracking-widest">Break-Even Exit Price</span>
+                                <div id="be-price" class="text-3xl font-bold font-mono text-white mt-1">$0.00</div>
+                            </div>
+
+                            <div class="space-y-3 my-6 border-t border-white/10 pt-4">
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-mono-400">Total Exchange Fees:</span>
+                                    <span id="be-fees" class="font-mono text-white">$0.00</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-mono-400">Fee Coverage Gain Required:</span>
+                                    <span id="be-pct" class="font-mono text-white">0.00%</span>
+                                </div>
+                            </div>
+
+                            <div class="text-[11px] text-mono-400 leading-relaxed">
+                                Factors combined entry & exit fee structures to ensure zero-loss exit price accuracy.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    
+    <footer class="max-w-7xl mx-auto w-full mt-12 py-4 border-t border-white/10 text-center text-xs font-mono text-mono-400">
+        TRADING KING CALCULATOR 
+    </footer>
+
+    
+    <script>
+        
+        const typewriterText = "TRADING KING CALCULATOR";
+        let typeIndex = 0;
+        const speed = 60;
+
+        function typeWriter() {
+            if (typeIndex < typewriterText.length) {
+                document.getElementById("typewriter-text").innerHTML += typewriterText.charAt(typeIndex);
+                typeIndex++;
+                setTimeout(typeWriter, speed);
+            }
+        }
+
+        window.onload = function() {
+            typeWriter();
+            initDcaRows();
+        };
+
+        
+        function switchTab(tabId) {
+            document.querySelectorAll('.calc-panel').forEach(panel => panel.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById('panel-' + tabId).classList.remove('hidden');
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+
+        
+        let pnlType = 'long';
+        function setPnLType(type) {
+            pnlType = type;
+            const longBtn = document.getElementById('pnl-type-long');
+            const shortBtn = document.getElementById('pnl-type-short');
+
+            if (type === 'long') {
+                longBtn.className = "py-2.5 rounded-xl border border-white/40 bg-white/10 text-white text-xs font-semibold transition";
+                shortBtn.className = "py-2.5 rounded-xl border border-white/10 bg-white/5 text-mono-400 text-xs font-semibold transition";
+            } else {
+                shortBtn.className = "py-2.5 rounded-xl border border-white/40 bg-white/10 text-white text-xs font-semibold transition";
+                longBtn.className = "py-2.5 rounded-xl border border-white/10 bg-white/5 text-mono-400 text-xs font-semibold transition";
+            }
+            calcPnL();
+        }
+
+        function calcPnL() {
+            const entry = parseFloat(document.getElementById('pnl-entry').value) || 0;
+            const exit = parseFloat(document.getElementById('pnl-exit').value) || 0;
+            const qty = parseFloat(document.getElementById('pnl-qty').value) || 0;
+            const lev = parseFloat(document.getElementById('pnl-lev').value) || 1;
+
+            if (entry <= 0 || exit <= 0 || qty <= 0) {
+                document.getElementById('pnl-status').innerText = "$0.00";
+                document.getElementById('pnl-roi').innerText = "ROI: 0.00%";
+                document.getElementById('pnl-margin').innerText = "$0.00";
+                document.getElementById('pnl-val').innerText = "$0.00";
+                document.getElementById('pnl-total').innerText = "$0.00";
+                return;
+            }
+
+            const positionValue = qty * lev;
+            const units = positionValue / entry;
+            let profit = 0;
+
+            if (pnlType === 'long') {
+                profit = (exit - entry) * units;
+            } else {
+                profit = (entry - exit) * units;
+            }
+
+            const roi = (profit / qty) * 100;
+            const totalReturn = qty + profit;
+
+            const statusEl = document.getElementById('pnl-status');
+            const roiEl = document.getElementById('pnl-roi');
+
+            statusEl.innerText = (profit >= 0 ? "+$" : "-$") + Math.abs(profit).toFixed(2);
+            roiEl.innerText = "ROI: " + (roi >= 0 ? "+" : "") + roi.toFixed(2) + "%";
+
+            document.getElementById('pnl-margin').innerText = "$" + qty.toFixed(2);
+            document.getElementById('pnl-val').innerText = "$" + positionValue.toFixed(2);
+            document.getElementById('pnl-total').innerText = "$" + totalReturn.toFixed(2);
+        }
+
+        function resetPnL() {
+            document.getElementById('pnl-entry').value = '';
+            document.getElementById('pnl-exit').value = '';
+            document.getElementById('pnl-qty').value = '';
+            document.getElementById('pnl-lev').value = '1';
+            setPnLType('long');
+        }
+
+        
+        let sltpType = 'long';
+        function setSLTPType(type) {
+            sltpType = type;
+            const longBtn = document.getElementById('sltp-type-long');
+            const shortBtn = document.getElementById('sltp-type-short');
+
+            if (type === 'long') {
+                longBtn.className = "py-2.5 rounded-xl border border-white/40 bg-white/10 text-white text-xs font-semibold transition";
+                shortBtn.className = "py-2.5 rounded-xl border border-white/10 bg-white/5 text-mono-400 text-xs font-semibold transition";
+            } else {
+                shortBtn.className = "py-2.5 rounded-xl border border-white/40 bg-white/10 text-white text-xs font-semibold transition";
+                longBtn.className = "py-2.5 rounded-xl border border-white/10 bg-white/5 text-mono-400 text-xs font-semibold transition";
+            }
+            calcSLTP();
+        }
+
+        function calcSLTP() {
+            const entry = parseFloat(document.getElementById('sltp-entry').value) || 0;
+            const riskPct = parseFloat(document.getElementById('sltp-risk-pct').value) || 0;
+            const rewardPct = parseFloat(document.getElementById('sltp-reward-pct').value) || 0;
+            const cap = parseFloat(document.getElementById('sltp-cap').value) || 0;
+
+            if (entry <= 0) {
+                document.getElementById('sltp-tp-price').innerText = "$0.00";
+                document.getElementById('sltp-sl-price').innerText = "$0.00";
+                document.getElementById('sltp-tp-amount').innerText = "Estimated Gain: +$0.00";
+                document.getElementById('sltp-sl-amount').innerText = "Maximum Risk: -$0.00";
+                return;
+            }
+
+            let tpPrice = 0, slPrice = 0;
+
+            if (sltpType === 'long') {
+                tpPrice = entry * (1 + rewardPct / 100);
+                slPrice = entry * (1 - riskPct / 100);
+            } else {
+                tpPrice = entry * (1 - rewardPct / 100);
+                slPrice = entry * (1 + riskPct / 100);
+            }
+
+            document.getElementById('sltp-tp-price').innerText = "$" + tpPrice.toFixed(4);
+            document.getElementById('sltp-sl-price').innerText = "$" + slPrice.toFixed(4);
+
+            if (cap > 0) {
+                const rewardVal = cap * (rewardPct / 100);
+                const riskVal = cap * (riskPct / 100);
+                document.getElementById('sltp-tp-amount').innerText = "Estimated Gain: +$" + rewardVal.toFixed(2);
+                document.getElementById('sltp-sl-amount').innerText = "Maximum Risk: -$" + riskVal.toFixed(2);
+            } else {
+                document.getElementById('sltp-tp-amount').innerText = "Target Gain: +" + rewardPct + "%";
+                document.getElementById('sltp-sl-amount').innerText = "Target Risk: -" + riskPct + "%";
+            }
+        }
+
+        function resetSLTP() {
+            document.getElementById('sltp-entry').value = '';
+            document.getElementById('sltp-risk-pct').value = '';
+            document.getElementById('sltp-reward-pct').value = '';
+            document.getElementById('sltp-cap').value = '';
+            setSLTPType('long');
+        }
+
+        
+        let dcaCount = 0;
+        function initDcaRows() {
+            const container = document.getElementById('dca-rows-container');
+            container.innerHTML = '';
+            dcaCount = 0;
+            addAvgRow();
+            addAvgRow();
+        }
+
+        function addAvgRow() {
+            if (dcaCount >= 5) return;
+            dcaCount++;
+            const container = document.getElementById('dca-rows-container');
+            const row = document.createElement('div');
+            row.id = 'dca-row-' + dcaCount;
+            row.className = "p-3 rounded-xl border border-white/10 bg-white/[0.02] space-y-2";
+            row.innerHTML = `
+                <div class="flex justify-between items-center text-xs font-mono text-mono-400">
+                    <span>Order #${dcaCount}</span>
+                    ${dcaCount > 1 ? `<button type="button" onclick="removeAvgRow(${dcaCount})" class="text-mono-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>` : ''}
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" id="avg-p${dcaCount}" placeholder="Price ($)" oninput="calcAvg()" class="glass-input px-3 py-2 rounded-lg text-xs font-mono">
+                    <input type="number" id="avg-q${dcaCount}" placeholder="Quantity/Units" oninput="calcAvg()" class="glass-input px-3 py-2 rounded-lg text-xs font-mono">
+                </div>
+            `;
+            container.appendChild(row);
+            
+            if (dcaCount >= 5) {
+                document.getElementById('add-row-btn').classList.add('opacity-50', 'cursor-not-allowed');
+            }
+            calcAvg();
+        }
+
+        function removeAvgRow(id) {
+            const row = document.getElementById('dca-row-' + id);
+            if (row) row.remove();
+            dcaCount--;
+            document.getElementById('add-row-btn').classList.remove('opacity-50', 'cursor-not-allowed');
+            calcAvg();
+        }
+
+        function calcAvg() {
+            let totalCost = 0;
+            let totalUnits = 0;
+
+            for (let i = 1; i <= 5; i++) {
+                const pEl = document.getElementById(`avg-p${i}`);
+                const qEl = document.getElementById(`avg-q${i}`);
+                if (pEl && qEl) {
+                    const p = parseFloat(pEl.value) || 0;
+                    const q = parseFloat(qEl.value) || 0;
+                    totalCost += p * q;
+                    totalUnits += q;
+                }
+            }
+
+            if (totalUnits <= 0) {
+                document.getElementById('avg-result-price').innerText = "$0.00";
+                document.getElementById('avg-total-cost').innerText = "$0.00";
+                document.getElementById('avg-total-units').innerText = "0.00";
+                return;
+            }
+
+            const avgPrice = totalCost / totalUnits;
+            document.getElementById('avg-result-price').innerText = "$" + avgPrice.toFixed(4);
+            document.getElementById('avg-total-cost').innerText = "$" + totalCost.toFixed(2);
+            document.getElementById('avg-total-units').innerText = totalUnits.toFixed(4);
+        }
+
+        function resetAvg() {
+            initDcaRows();
+        }
+
+        
+        function calcPos() {
+            const balance = parseFloat(document.getElementById('pos-balance').value) || 0;
+            const riskPct = parseFloat(document.getElementById('pos-risk-pct').value) || 0;
+            const entry = parseFloat(document.getElementById('pos-entry').value) || 0;
+            const sl = parseFloat(document.getElementById('pos-sl').value) || 0;
+
+            if (balance <= 0 || riskPct <= 0 || entry <= 0 || sl <= 0 || entry === sl) {
+                document.getElementById('pos-size-usd').innerText = "$0.00";
+                document.getElementById('pos-size-units').innerText = "Contract Units: 0.00";
+                document.getElementById('pos-risk-usd').innerText = "$0.00";
+                document.getElementById('pos-sl-dist').innerText = "0.00%";
+                return;
+            }
+
+            const riskUSD = balance * (riskPct / 100);
+            const slDistancePct = Math.abs(entry - sl) / entry;
+            const positionSizeUSD = riskUSD / slDistancePct;
+            const units = positionSizeUSD / entry;
+
+            document.getElementById('pos-size-usd').innerText = "$" + positionSizeUSD.toFixed(2);
+            document.getElementById('pos-size-units').innerText = "Contract Units: " + units.toFixed(4);
+            document.getElementById('pos-risk-usd').innerText = "$" + riskUSD.toFixed(2);
+            document.getElementById('pos-sl-dist').innerText = (slDistancePct * 100).toFixed(2) + "%";
+        }
+
+        function resetPos() {
+            document.getElementById('pos-balance').value = '';
+            document.getElementById('pos-risk-pct').value = '';
+            document.getElementById('pos-entry').value = '';
+            document.getElementById('pos-sl').value = '';
+            calcPos();
+        }
+
+       
+        function calcRR() {
+            const entry = parseFloat(document.getElementById('rr-entry').value) || 0;
+            const sl = parseFloat(document.getElementById('rr-sl').value) || 0;
+            const target = parseFloat(document.getElementById('rr-target').value) || 0;
+            const amount = parseFloat(document.getElementById('rr-amount').value) || 0;
+
+            if (entry <= 0 || sl <= 0 || target <= 0 || entry === sl) {
+                document.getElementById('rr-ratio').innerText = "1 : 0.00";
+                document.getElementById('rr-quality').innerText = "INACTIVE";
+                document.getElementById('rr-risk-val').innerText = "$0.00 (0.00%)";
+                document.getElementById('rr-reward-val').innerText = "$0.00 (0.00%)";
+                return;
+            }
+
+            const riskDist = Math.abs(entry - sl);
+            const rewardDist = Math.abs(target - entry);
+            const rrRatio = rewardDist / riskDist;
+
+            const riskPct = (riskDist / entry) * 100;
+            const rewardPct = (rewardDist / entry) * 100;
+
+            document.getElementById('rr-ratio').innerText = "1 : " + rrRatio.toFixed(2);
+
+            const qualityEl = document.getElementById('rr-quality');
+            if (rrRatio >= 2) {
+                qualityEl.innerText = "OPTIMAL RATIO (1:" + rrRatio.toFixed(1) + ")";
+            } else if (rrRatio >= 1) {
+                qualityEl.innerText = "BALANCED RATIO (1:" + rrRatio.toFixed(1) + ")";
+            } else {
+                qualityEl.innerText = "HIGH RISK SETUP";
+            }
+
+            if (amount > 0) {
+                const riskUSD = amount * (riskPct / 100);
+                const rewardUSD = amount * (rewardPct / 100);
+                document.getElementById('rr-risk-val').innerText = "-$" + riskUSD.toFixed(2) + " (" + riskPct.toFixed(2) + "%)";
+                document.getElementById('rr-reward-val').innerText = "+$" + rewardUSD.toFixed(2) + " (" + rewardPct.toFixed(2) + "%)";
+            } else {
+                document.getElementById('rr-risk-val').innerText = "-" + riskPct.toFixed(2) + "%";
+                document.getElementById('rr-reward-val').innerText = "+" + rewardPct.toFixed(2) + "%";
+            }
+        }
+
+        function resetRR() {
+            document.getElementById('rr-entry').value = '';
+            document.getElementById('rr-sl').value = '';
+            document.getElementById('rr-target').value = '';
+            document.getElementById('rr-amount').value = '';
+            calcRR();
+        }
+
+        
+        let targetType = 'long';
+        function setTargetType(type) {
+            targetType = type;
+            const longBtn = document.getElementById('target-type-long');
+            const shortBtn = document.getElementById('target-type-short');
+
+            if (type === 'long') {
+                longBtn.className = "py-2.5 rounded-xl border border-white/40 bg-white/10 text-white text-xs font-semibold transition";
+                shortBtn.className = "py-2.5 rounded-xl border border-white/10 bg-white/5 text-mono-400 text-xs font-semibold transition";
+            } else {
+                shortBtn.className = "py-2.5 rounded-xl border border-white/40 bg-white/10 text-white text-xs font-semibold transition";
+                longBtn.className = "py-2.5 rounded-xl border border-white/10 bg-white/5 text-mono-400 text-xs font-semibold transition";
+            }
+            calcTarget();
+        }
+
+        function calcTarget() {
+            const entry = parseFloat(document.getElementById('target-entry').value) || 0;
+            const targetPct = parseFloat(document.getElementById('target-pct').value) || 0;
+            const capital = parseFloat(document.getElementById('target-capital').value) || 0;
+
+            if (entry <= 0) {
+                document.getElementById('target-exit-price').innerText = "$0.00";
+                document.getElementById('target-profit-usd').innerText = "$0.00";
+                document.getElementById('target-move-pct').innerText = "0.00%";
+                return;
+            }
+
+            let requiredExit = 0;
+            if (targetType === 'long') {
+                requiredExit = entry * (1 + targetPct / 100);
+            } else {
+                requiredExit = entry * (1 - targetPct / 100);
+            }
+
+            document.getElementById('target-exit-price').innerText = "$" + requiredExit.toFixed(4);
+            document.getElementById('target-move-pct').innerText = targetPct.toFixed(2) + "%";
+
+            if (capital > 0) {
+                const profitUSD = capital * (targetPct / 100);
+                document.getElementById('target-profit-usd').innerText = "+$" + profitUSD.toFixed(2);
+            } else {
+                document.getElementById('target-profit-usd').innerText = "+" + targetPct + "%";
+            }
+        }
+
+        function resetTarget() {
+            document.getElementById('target-entry').value = '';
+            document.getElementById('target-pct').value = '';
+            document.getElementById('target-capital').value = '';
+            setTargetType('long');
+        }
+
+        
+        function calcBE() {
+            const entry = parseFloat(document.getElementById('be-entry').value) || 0;
+            const buyFee = parseFloat(document.getElementById('be-buy-fee').value) || 0;
+            const sellFee = parseFloat(document.getElementById('be-sell-fee').value) || 0;
+            const qty = parseFloat(document.getElementById('be-qty').value) || 0;
+
+            if (entry <= 0) {
+                document.getElementById('be-price').innerText = "$0.00";
+                document.getElementById('be-fees').innerText = "$0.00";
+                document.getElementById('be-pct').innerText = "0.00%";
+                return;
+            }
+
+            const buyFeeDecimal = buyFee / 100;
+            const sellFeeDecimal = sellFee / 100;
+
+            const breakEvenPrice = (entry * (1 + buyFeeDecimal)) / (1 - sellFeeDecimal);
+            const reqPctIncrease = ((breakEvenPrice - entry) / entry) * 100;
+
+            document.getElementById('be-price').innerText = "$" + breakEvenPrice.toFixed(4);
+            document.getElementById('be-pct').innerText = "+" + reqPctIncrease.toFixed(3) + "%";
+
+            if (qty > 0) {
+                const totalBuyFee = qty * buyFeeDecimal;
+                const totalSellFee = (qty + totalBuyFee) * sellFeeDecimal;
+                const totalFeeVal = totalBuyFee + totalSellFee;
+                document.getElementById('be-fees').innerText = "$" + totalFeeVal.toFixed(2);
+            } else {
+                const totalFeePct = buyFee + sellFee;
+                document.getElementById('be-fees').innerText = "~" + totalFeePct.toFixed(2) + "%";
+            }
+        }
+
+        function resetBE() {
+            document.getElementById('be-entry').value = '';
+            document.getElementById('be-buy-fee').value = '0.10';
+            document.getElementById('be-sell-fee').value = '0.10';
+            document.getElementById('be-qty').value = '';
+            calcBE();
+        }
+    </script>
+</body>
+</html>
