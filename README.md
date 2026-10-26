@@ -25,14 +25,8 @@ A professional, high-performance financial suite designed for traders who need q
 
 ---
 
-## 🚀 Live Demo
-
-Check out the live app here: [https://janithchathumina.github.io/Trading-King-Calculator/](https://janithchathumina.github.io/Trading-King-Calculator/)
-
----
-
 ## 💡 How to Run Locally
 
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/janithchathumina/Trading-King-Calculator.git](https://github.com/janithchathumina/Trading-King-Calculator.git)
+   https://github.com/janithchathumina/Trading-King-Calculator.git
